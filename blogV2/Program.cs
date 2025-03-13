@@ -9,9 +9,39 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
+using Microsoft.OpenApi;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddSwaggerGen(c =>
+// {
+//     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//     {
+//         Name = "authorization",
+//         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+//         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+//         Scheme = "Bearer",
+//         BearerFormat = "JWT",
+//         Description = "enter your jwt token in the format 'Bearer {your token here}'"
+//     });
+//     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+//         {
+//             {
+//                 new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+//                 {
+//                     Reference = new Microsoft.OpenApi.Models.OpenApiReference
+//                     {
+//                         Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+//                         Id = "Bearer"
+//                     }
+//                 },
+//                 new string[] {}
+//             }
+//         });
+// });
 
+// builder.Services.AddSwaggerGen();
 // 1- we configure JWT 
 // add JWT section in appsettings.json
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -56,13 +86,26 @@ builder.Services.AddControllers()
 
 
 var app = builder.Build();
+app.UseStaticFiles();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 //5- we enable authentication and authorization middleware 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/", () => "Hello World!");
+// app.MapGet("/", () => "Hello World!");
+
+app.MapGet("/", (context) =>
+{
+    // context.Response.Redirect("index.html");
+    context.Response.Redirect("/vite/index.html");
+    return Task.CompletedTask;
+});
 
 app.Run();
